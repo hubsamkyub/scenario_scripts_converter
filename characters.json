@@ -1,0 +1,14 @@
+{
+  "dongbin": {
+    "name": "dongbin",
+    "kr": "동빈",
+    "string_id": "dongbin",
+    "converter_name": "[@dongbin]"
+  },
+  "db": {
+    "name": "db",
+    "kr": "ㄷㅂ",
+    "string_id": "db",
+    "converter_name": "[@db]"
+  }
+}
