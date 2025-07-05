@@ -16,10 +16,11 @@ except ImportError:
 
 class GoogleSheetsManager:
     """
-    구글 시트 API 관리 클래스 (v2.8 - 인증 로직 최종 수정)
+    구글 시트 API 관리 클래스 (v2.9 - 최종)
     """
 
     def __init__(self, service_account_file="service_account_key.json"):
+        # [함수명: __init__]: 변경 없음
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.service_account_file = os.path.join(base_dir, service_account_file)
         self.gc = None
@@ -27,53 +28,47 @@ class GoogleSheetsManager:
 
     def _initialize_client(self):
         """
-        [수정] 환경을 예측하는 대신, Secrets 방식 우선 시도 후 실패 시 로컬 파일 방식으로 넘어갑니다.
+        [수정] 상세 디버깅 로그를 제거하고, 사이드바에 최종 상태만 표시합니다.
         """
-        st.subheader("🕵️‍♂️ 구글 인증 디버그 로그")
-        
         if not GSPREAD_AVAILABLE:
-            st.error("❌ **[오류] 라이브러리 확인 실패:** `gspread`가 설치되지 않았습니다.")
+            st.sidebar.error("라이브러리 없음: `gspread`")
             return False
-        st.success("✅ **[성공] 라이브러리 확인:** `gspread`가 존재합니다.")
 
-        # --- 1. 웹 배포 환경(Secrets) 우선 시도 ---
         try:
-            st.info("ℹ️ **[시도 1/2] Streamlit Secrets 인증을 시작합니다.")
-            # st.secrets가 존재하고, 그 안에 키가 있는지 확인
+            # 1. 웹 배포 환경(Secrets) 우선 시도
             if hasattr(st, 'secrets') and "gcp_service_account" in st.secrets:
                 creds_json = st.secrets["gcp_service_account"]
                 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
                 credentials = Credentials.from_service_account_info(creds_json, scopes=scope)
                 self.gc = gspread.authorize(credentials)
-                st.success("🎉 **인증 성공!** Streamlit Secrets를 사용했습니다.")
+                st.sidebar.success("상태: 웹 배포 환경")
                 return True
-            else:
-                st.warning("⚠️ **[정보]** Secrets에 `[gcp_service_account]` 항목이 없습니다. 다음 단계를 시도합니다.")
-        except Exception as e:
-            st.warning(f"⚠️ **[정보]** Secrets 인증 중 오류가 발생하여 다음 단계를 시도합니다. (오류: {e})")
+        except Exception:
+            # Secrets 인증 실패 시 다음 단계로
+            pass
 
-        # --- 2. 로컬 파일 환경 시도 ---
+        # 2. 로컬 파일 환경 시도
         try:
-            st.info("ℹ️ **[시도 2/2] 로컬 `service_account_key.json` 파일 인증을 시작합니다.")
             if os.path.exists(self.service_account_file):
                 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
                 credentials = Credentials.from_service_account_file(self.service_account_file, scopes=scope)
                 self.gc = gspread.authorize(credentials)
-                st.success("🎉 **인증 성공!** 로컬 파일을 사용했습니다.")
+                st.sidebar.success("상태: 로컬 환경")
                 return True
-            else:
-                st.error(f"❌ **[실패]** 로컬 파일 '{os.path.basename(self.service_account_file)}'을 찾을 수 없습니다.")
-        except Exception as e:
-            st.error(f"❌ **[실패]** 로컬 파일 인증 중 오류가 발생했습니다. (오류: {e})")
+        except Exception:
+            # 로컬 파일 인증도 실패 시 다음 단계로
+            pass
 
-        # --- 최종 실패 ---
+        # 최종 실패
         self.gc = None
-        st.error("🚨 **최종 인증 실패:** 모든 인증 방법을 시도했지만 구글 API에 연결할 수 없습니다.")
+        st.sidebar.error("상태: 구글 API 연결 실패")
         return False
 
     def is_available(self):
+        # [함수명: is_available]: 변경 없음
         return GSPREAD_AVAILABLE and self.gc is not None
-
+    
+    # 이하 다른 함수들은 변경 없음
     def extract_sheet_id(self, url):
         patterns = [r'/spreadsheets/d/([a-zA-Z0-9-_]+)', r'docs\.google\.com/spreadsheets/d/([a-zA-Z0-9-_]+)']
         for pattern in patterns:
