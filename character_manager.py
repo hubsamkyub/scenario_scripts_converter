@@ -150,6 +150,51 @@ class CharacterManager:
         self.save_characters()
         
         return True, f"캐릭터 '{name}' 추가 완료!", character_data
+
+
+    def add_characters_batch(self, characters_to_add):
+        """
+        [신규] 여러 캐릭터를 한 번에 추가합니다.
+        """
+        success_count = 0
+        error_messages = []
+        
+        for char_info in characters_to_add:
+            name = char_info.get("name", "").strip()
+            kr = char_info.get("kr", "").strip()
+            string_id = char_info.get("string_id", "").strip()
+
+            # 필수 정보 확인
+            if not name or not kr or not string_id:
+                error_messages.append(f"'{kr}' 캐릭터: Name, KR, String_ID는 필수 입력 항목입니다.")
+                continue
+
+            # 중복 및 유효성 검사
+            if self.get_character_by_name(name) or self.get_character_by_kr(kr):
+                error_messages.append(f"'{kr}' 캐릭터: 이미 등록된 이름입니다.")
+                continue
+            
+            is_valid, validation_message = self.validate_string_id(string_id)
+            if not is_valid:
+                error_messages.append(f"'{kr}' 캐릭터 ({string_id}): {validation_message}")
+                continue
+
+            # 캐릭터 데이터 생성 및 추가
+            converter_name = self.generate_converter_name(string_id)
+            character_data = {
+                'name': name,
+                'kr': kr,
+                'string_id': string_id,
+                'converter_name': converter_name
+            }
+            self.characters[string_id] = character_data
+            success_count += 1
+
+        if success_count > 0:
+            self.save_characters()
+
+        return success_count, error_messages
+
     
     def update_character(self, string_id, name=None, kr_name=None, new_string_id=None):
         """

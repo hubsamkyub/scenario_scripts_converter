@@ -730,5 +730,11 @@
     "kr": "메리토스",
     "string_id": "mrs_meritos",
     "converter_name": "[@mrs_meritos]"
+  },
+  "rogue": {
+    "name": "Rogue",
+    "kr": "로그",
+    "string_id": "rogue",
+    "converter_name": "[@rogue]"
   }
 }

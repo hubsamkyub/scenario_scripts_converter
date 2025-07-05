@@ -1,180 +1,110 @@
 import pandas as pd
-import re
-from io import StringIO
 from portrait_sound_manager import PortraitSoundManager
 
-# 캐릭터 매핑은 CharacterManager에서 동적으로 관리됩니다.
-
-def validate_data(input_text, auto_fill=True, char_manager=None):
+class ConverterLogic:
     """
-    입력 데이터 검증 및 자동 채우기
+    지시문별 규칙과 상세 리포팅을 처리하는 클래스 (v2.3)
     """
-    try:
-        # 탭으로 구분된 데이터를 DataFrame으로 변환
-        df = pd.read_csv(StringIO(input_text), sep='\t')
-        df.columns = df.columns.str.strip()
-        
-        column_patterns = {
-            '캐릭터': ['캐릭터', 'character', 'char', '이름', 'name', '화자', 'speaker'],
-            '대사': ['대사', 'dialogue', 'dialog', 'text', '텍스트', '내용', 'content', 'line'],
-            '포트레이트': ['포트레이트', 'portrait', '초상화', 'image', '이미지'],
-            '사운드 주소': ['사운드 주소', 'sound address', 'sound_address', 'audio address', 'audio_address', '오디오 주소'],
-            '사운드 파일명': ['사운드 파일명', 'sound file', 'sound_file', 'audio file', 'audio_file', '오디오 파일', 'filename']
+    def __init__(self, character_manager, portrait_sound_manager):
+        self.character_manager = character_manager
+        self.ps_manager = portrait_sound_manager
+        self.directive_rules = {
+            "대사": self._convert_dialogue,
+            "자막": self._convert_subtitle,
+            "카메라": lambda row: {"status": "success", "result": "카메라_이동_옵셋()", "message": "성공"},
+            "조명": lambda row: {"status": "success", "result": "뷰포트_필터_블랙()", "message": "성공"},
         }
-        
-        mapped_columns = {}
-        for target_col, patterns in column_patterns.items():
-            for pattern in patterns:
-                for actual_col in df.columns:
-                    if pattern.lower() in actual_col.lower():
-                        mapped_columns[target_col] = actual_col
-                        break
-                if target_col in mapped_columns:
-                    break
-        
-        required_columns = ['캐릭터', '대사']
-        missing_required = [col for col in required_columns if col not in mapped_columns]
-        
-        if missing_required:
-            available_columns = list(df.columns)
-            return False, f"필수 컬럼({', '.join(missing_required)})을 찾을 수 없습니다. 현재 컬럼: {', '.join(available_columns)}", None
-        
-        df_renamed = df.copy()
-        for target_col, actual_col in mapped_columns.items():
-            if actual_col in df_renamed.columns:
-                df_renamed = df_renamed.rename(columns={actual_col: target_col})
 
-        for col in column_patterns.keys():
-            if col not in df_renamed.columns:
-                df_renamed[col] = ""
-        
-        # NA 값들을 빈 문자열로 일괄 변환
-        for col in df_renamed.columns:
-            df_renamed[col] = df_renamed[col].fillna('')
-
-        df_renamed = df_renamed.dropna(subset=['캐릭터', '대사'], how='all')
-        df_renamed = df_renamed[
-            (df_renamed['캐릭터'].astype(str).str.strip() != '') & 
-            (df_renamed['대사'].astype(str).str.strip() != '')
-        ]
-
-        if len(df_renamed) == 0:
-            return False, "유효한 데이터가 없습니다. 캐릭터와 대사가 모두 입력된 행이 필요합니다.", None
-
-        if auto_fill and char_manager:
-            portrait_sound_manager = PortraitSoundManager(char_manager)
-            df_renamed = portrait_sound_manager.auto_fill_missing_fields(df_renamed)
-
-        return True, f"데이터가 유효합니다. 매핑된 컬럼: {', '.join(mapped_columns.keys())}", df_renamed
-        
-    except Exception as e:
-        return False, f"데이터 파싱 오류: {str(e)}", None
-
-
-def get_character_code(character_name, char_manager=None):
-    if char_manager:
-        char_data = char_manager.get_character_by_kr(character_name) or char_manager.get_character_by_name(character_name)
-        if char_data:
-            return char_data['string_id']
-    
-    return re.sub(r'[^a-zA-Z0-9_]', '', character_name).lower() or 'unknown'
-
-def extract_dialogue_id(sound_filename, row_index):
-    if pd.isna(sound_filename) or not sound_filename:
-        return f"cs_unknown_{row_index+1:03d}"
-    
-    match = re.search(r'(\d{8,})', str(sound_filename)) or re.search(r'(\d+)', str(sound_filename))
-    base_number = match.group(1) if match else "unknown"
-    return f"cs_{base_number}_{row_index+1:03d}"
-
-def clean_dialogue_text(dialogue_text):
-    if pd.isna(dialogue_text):
+    def _generate_fallback_string_id(self, row):
+        # [수정] 소문자 컬럼명 사용
+        sound_file = row.get('사운드 파일', '')
+        if sound_file and isinstance(sound_file, str):
+            return f"cs_{sound_file}"
         return ""
-    cleaned = str(dialogue_text).replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-    cleaned = cleaned.replace('"', '\\"')
-    return cleaned
 
+    def _convert_dialogue(self, row):
+        """
+        [수정] '대사' 지시문 변환 시 소문자 컬럼명을 사용합니다.
+        """
+        messages = []
+        # 1. 캐릭터 검증
+        char_name = row.get("캐릭터", "")
+        if not char_name:
+            return {"status": "error", "result": "# [오류] '캐릭터' 정보가 비어있습니다.", "message": "필수값 '캐릭터' 없음"}
+        char_data = self.character_manager.get_character_by_kr(char_name) or self.character_manager.get_character_by_name(char_name)
+        if not char_data:
+            return {"status": "error", "result": f"# [오류] 등록되지 않은 캐릭터: {char_name}", "message": f"미등록 캐릭터: {char_name}"}
+        char_string_id = char_data.get('string_id', 'unknown')
 
-def convert_single_row(row, row_index, char_manager=None):
-    """
-    단일 행을 대사 형식으로 변환.
-    성공, 오류, 경고를 담은 딕셔너리를 반환합니다.
-    """
-    result = {
-        "status": "error",
-        "message": "",
-        "warning": ""
-    }
-    try:
-        character = str(row.get('캐릭터', '')).strip()
-        dialogue = str(row.get('대사', '')).strip()
+        # 2. STRING_ID 검증 및 자동 생성 (소문자 키 사용)
+        dialogue_string_id = row.get('string_id', '')
+        if not dialogue_string_id or (isinstance(dialogue_string_id, str) and dialogue_string_id.strip() == ''):
+            dialogue_string_id = self._generate_fallback_string_id(row)
+            if not dialogue_string_id:
+                 return {"status": "error", "result": "# [오류] STRING_ID가 비어있고, ID 생성에 필요한 '사운드 파일'도 없습니다.", "message": "ID 생성 불가"}
+            messages.append("경고: 'STRING_ID'가 비어있어 '사운드 파일' 기준으로 자동 생성했습니다.")
+
+        # 3. 포트레이트 경로 생성
+        expression = row.get('표정', '')
+        portrait_path = self.ps_manager.generate_portrait_path(char_name, expression)
+
+        # 4. 사운드 경로 생성
+        sound_address = row.get('사운드 주소', '')
+        sound_file = row.get('사운드 파일', '')
+        sound_path = self.ps_manager.generate_sound_path(sound_address, sound_file)
+
+        # 5. 최종 3줄 텍스트 조합
+        line1 = f'스토리_대화상자_추가("[@{char_string_id}]","[@{dialogue_string_id}]","{portrait_path}","{sound_path}")'
+        line2 = f'#{row.get("대사", "")}'
+        line3 = '대기()'
+        result_text = f"{line1}\n{line2}\n{line3}"
+        status = "warning" if messages else "success"
+        message_text = " | ".join(messages) if messages else "성공"
+        return {"status": status, "result": result_text, "message": message_text}
+
+    def _convert_subtitle(self, row):
+        """
+        [수정] '자막' 지시문 변환 시 소문자 컬럼명을 사용합니다.
+        """
+        messages = []
+        # 1. 자막 STRING_ID 검증 및 자동 생성 (소문자 키 사용)
+        subtitle_string_id = row.get('string_id', '')
+        if not subtitle_string_id or (isinstance(subtitle_string_id, str) and subtitle_string_id.strip() == ''):
+            subtitle_string_id = self._generate_fallback_string_id(row)
+            if not subtitle_string_id:
+                return {"status": "error", "result": "# [오류] STRING_ID가 비어있고, ID 생성에 필요한 '사운드 파일'도 없습니다.", "message": "ID 생성 불가"}
+            messages.append("경고: 'STRING_ID'가 비어있어 '사운드 파일' 기준으로 자동 생성했습니다.")
         
-        if not character or not dialogue:
-            result["message"] = f"# 오류: 행 {row_index+1}의 캐릭터 또는 대사가 비어있습니다."
-            return result
+        # 2. 사운드 경로 생성
+        sound_address = row.get('사운드 주소', '')
+        sound_file = row.get('사운드 파일', '')
+        sound_path = self.ps_manager.generate_sound_path(sound_address, sound_file)
 
-        portrait = str(row.get('포트레이트', '')).strip()
-        sound_address = str(row.get('사운드 주소', '')).strip()
-        sound_filename = str(row.get('사운드 파일명', '')).strip()
+        # 3. 최종 3줄 텍스트 조합
+        line1 = f'나레이션_텍스트("[@{subtitle_string_id}]","","","","{sound_path}")'
+        line2 = f'#{row.get("대사", "")}'
+        line3 = '지연(0)'
+        result_text = f"{line1}\n{line2}\n{line3}"
+        status = "warning" if messages else "success"
+        message_text = " | ".join(messages) if messages else "성공"
+        return {"status": status, "result": result_text, "message": message_text}
 
-        character_code = get_character_code(character, char_manager)
-        
-        if char_manager and not (char_manager.get_character_by_kr(character) or char_manager.get_character_by_name(character)):
-            result["warning"] = f"'{character}'는 등록되지 않은 캐릭터입니다."
+    def _convert_default(self, row):
+        """
+        [함수명: _convert_default]: 변경 없음
+        """
+        dialogue_text = row.get("대사", "")
+        return {"status": "success", "result": f"#{dialogue_text}", "message": "기본 주석 처리"}
 
-        dialogue_id = extract_dialogue_id(sound_filename, row_index)
-        clean_dialogue = clean_dialogue_text(dialogue)
-        
-        # nan 문자열 체크
-        portrait = "" if portrait.lower() == 'nan' else portrait
-        sound_address = "" if sound_address.lower() == 'nan' else sound_address
-        
-        result["status"] = "success"
-        result["message"] = f'스토리_대화상자_추가("[@{character_code}]","[@{dialogue_id}]","{portrait}","{sound_address}")#{clean_dialogue}대기()'
-        return result
-
-    except Exception as e:
-        result["message"] = f"# 오류 발생 (행 {row_index+1}): {str(e)}"
-        return result
-
-
-def convert_dialogue_data(df, char_manager=None, progress_callback=None):
-    results = []
-    total_rows = len(df)
-    for index, row in df.iterrows():
-        converted_result = convert_single_row(row, index, char_manager)
-        results.append(converted_result)
-        if progress_callback:
-            progress = (index + 1) / total_rows
-            progress_callback(progress)
-    return results
-
-
-def validate_conversion_result(results):
-    stats = {
-        'total_lines': len(results),
-        'error_lines': 0,
-        'warning_lines': 0,
-        'success_lines': 0,
-        'errors': [],
-        'warnings': []
-    }
-    for i, line in enumerate(results):
-        if isinstance(line, str) and line.startswith('# 오류'):
-            stats['error_lines'] += 1
-            stats['errors'].append(f"행 {i+1}: {line}")
-        elif isinstance(line, str) and '# 경고' in line:
-            stats['warning_lines'] += 1
-            stats['warnings'].append(f"행 {i+1}: 미등록 캐릭터 경고") # Simplified
-        else:
-            stats['success_lines'] += 1
-    return stats
-
-
-def format_conversion_summary(stats):
-    return f"""
-    총 {stats['total_lines']}개 행 변환: 
-    ✅ 성공: {stats['success_lines']}개, 
-    ❌ 오류: {stats['error_lines']}개
-    """
+    def convert_scene_data(self, scene_df):
+        """
+        [수정] 소문자 컬럼명을 사용하여 변환을 수행합니다.
+        """
+        results = []
+        for index, row in scene_df.iterrows():
+            directive = row.get("지시문", "") # 이미 소문자로 변환되어 있음
+            directive = directive.strip() if isinstance(directive, str) else ""
+            convert_function = self.directive_rules.get(directive, self._convert_default)
+            result_dict = convert_function(row)
+            results.append(result_dict)
+        return results
