@@ -19,20 +19,28 @@ class GoogleSheetsManager:
     """
 
     def __init__(self, service_account_file="service_account_key.json"):
-        # [함수명: __init__]: 변경 없음
+        # 이 스크립트 파일이 있는 디렉토리를 기준으로 service_account_key.json 파일의 전체 경로를 만듭니다.
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.service_account_file = os.path.join(base_dir, service_account_file)
+        
         self.gc = None
         self._initialize_client()
 
     def _initialize_client(self):
-        # [함수명: _initialize_client]: 변경 없음
+        """
+        로컬 환경과 웹 배포 환경의 인증 로직을 명확히 분리합니다.
+        """
         if not GSPREAD_AVAILABLE:
             self.gc = None
             return False
+
         try:
+            # os.environ.get('STREAMLIT_SERVER_PORT')는 Streamlit Cloud에 배포되었을 때만 값이 존재합니다.
             is_deployed = os.environ.get('STREAMLIT_SERVER_PORT')
+
             if is_deployed:
+                # 1. 웹 배포 환경: st.secrets를 사용합니다.
+                print("배포 환경으로 인식: Streamlit Secrets를 사용합니다.")
                 if st.secrets.get("gcp_service_account"):
                     creds_json = st.secrets["gcp_service_account"]
                     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
@@ -40,24 +48,27 @@ class GoogleSheetsManager:
                     self.gc = gspread.authorize(credentials)
                     return True
             else:
+                # 2. 로컬 환경: service_account_key.json 파일을 사용합니다.
+                print("로컬 환경으로 인식: service_account_key.json 파일을 사용합니다.")
                 if os.path.exists(self.service_account_file):
                     scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
                     credentials = Credentials.from_service_account_file(self.service_account_file, scopes=scope)
                     self.gc = gspread.authorize(credentials)
                     return True
+
+            # 3. 두 방법 모두 실패한 경우
             self.gc = None
             return False
+            
         except Exception as e:
             print(f"구글 시트 클라이언트 초기화 중 예상치 못한 오류 발생: {e}")
             self.gc = None
             return False
 
     def is_available(self):
-        # [함수명: is_available]: 변경 없음
         return GSPREAD_AVAILABLE and self.gc is not None
 
     def extract_sheet_id(self, url):
-        # [함수명: extract_sheet_id]: 변경 없음
         patterns = [
             r'/spreadsheets/d/([a-zA-Z0-9-_]+)',
             r'docs\.google\.com/spreadsheets/d/([a-zA-Z0-9-_]+)',
@@ -69,7 +80,6 @@ class GoogleSheetsManager:
         return None
 
     def get_sheet_names(self, url):
-        # [함수명: get_sheet_names]: 변경 없음
         if not self.is_available():
             return False, "구글 시트 API가 설정되지 않았습니다.", None
         try:
@@ -86,9 +96,6 @@ class GoogleSheetsManager:
             return False, f"시트 목록을 가져오는 중 오류 발생: {e}", None
 
     def read_sheet_data(self, url, sheet_name):
-        """
-        [수정] 헤더를 소문자로 변환하고, 원본 행 번호를 추가하는 로직을 적용합니다.
-        """
         if not self.is_available():
             return False, "구글 시트 API가 설정되지 않았습니다.", None
         try:
@@ -100,22 +107,17 @@ class GoogleSheetsManager:
             worksheet = spreadsheet.worksheet(sheet_name)
             data = worksheet.get_all_values()
             
-            header_row_index = 3  # 헤더는 4번째 행 (인덱스 3)
-            data_start_row = 4    # 데이터는 5번째 행부터 시작
+            header_row_index = 3
+            data_start_row = 4
 
             if not data or len(data) < data_start_row + 1:
                 return False, "시트에 데이터가 부족합니다. (최소 5줄 필요)", None
             
             header = data[header_row_index]
             actual_data = data[data_start_row:]
-            
             df = pd.DataFrame(actual_data, columns=header)
             
-            # [수정] 모든 컬럼명을 소문자로 통일 (양쪽 공백 제거 포함)
             df.columns = [str(col).strip().lower() for col in df.columns]
-            
-            # [신규] '원본 행 번호' 컬럼 추가 (엑셀의 실제 행 번호)
-            # 데이터 시작 행 번호(5)부터 DataFrame 길이에 맞게 번호 부여
             df.insert(0, '원본 행 번호', range(data_start_row + 1, data_start_row + 1 + len(df)))
 
             df.dropna(how='all', inplace=True)
