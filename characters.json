@@ -1,14 +1,734 @@
 {
-  "dongbin": {
-    "name": "dongbin",
-    "kr": "동빈",
-    "string_id": "dongbin",
-    "converter_name": "[@dongbin]"
+  "avin": {
+    "name": "Avin",
+    "kr": "어빈",
+    "string_id": "avin",
+    "converter_name": "[@avin]"
   },
-  "db": {
-    "name": "db",
-    "kr": "ㄷㅂ",
-    "string_id": "db",
-    "converter_name": "[@db]"
+  "mile": {
+    "name": "Mile",
+    "kr": "마일",
+    "string_id": "mile",
+    "converter_name": "[@mile]"
+  },
+  "michel": {
+    "name": "Michel",
+    "kr": "미첼",
+    "string_id": "michel",
+    "converter_name": "[@michel]"
+  },
+  "forte": {
+    "name": "Forte",
+    "kr": "폴트",
+    "string_id": "forte",
+    "converter_name": "[@forte]"
+  },
+  "una": {
+    "name": "Una",
+    "kr": "우나",
+    "string_id": "una",
+    "converter_name": "[@una]"
+  },
+  "mcvein": {
+    "name": "Mcvein",
+    "kr": "맥베인",
+    "string_id": "mcvein",
+    "converter_name": "[@mcvein]"
+  },
+  "aria": {
+    "name": "Aria",
+    "kr": "아리아",
+    "string_id": "aria",
+    "converter_name": "[@aria]"
+  },
+  "thomas": {
+    "name": "Thomas",
+    "kr": "토마스",
+    "string_id": "thomas",
+    "converter_name": "[@thomas]"
+  },
+  "roucaW": {
+    "name": "Roucaw",
+    "kr": "루카 부선장",
+    "string_id": "roucaW",
+    "converter_name": "[@roucaW]"
+  },
+  "ramon": {
+    "name": "Ramon",
+    "kr": "라몬",
+    "string_id": "ramon",
+    "converter_name": "[@ramon]"
+  },
+  "JackSlade": {
+    "name": "Jackslade",
+    "kr": "잭 슬레이드",
+    "string_id": "JackSlade",
+    "converter_name": "[@JackSlade]"
+  },
+  "aida": {
+    "name": "Aida",
+    "kr": "아이다",
+    "string_id": "aida",
+    "converter_name": "[@aida]"
+  },
+  "altos": {
+    "name": "Altos",
+    "kr": "알토스",
+    "string_id": "altos",
+    "converter_name": "[@altos]"
+  },
+  "eimelle": {
+    "name": "Eimelle",
+    "kr": "아이멜",
+    "string_id": "eimelle",
+    "converter_name": "[@eimelle]"
+  },
+  "archem": {
+    "name": "Archem",
+    "kr": "알쳄",
+    "string_id": "archem",
+    "converter_name": "[@archem]"
+  },
+  "gawaine": {
+    "name": "Gawaine",
+    "kr": "가웨인",
+    "string_id": "gawaine",
+    "converter_name": "[@gawaine]"
+  },
+  "ollesia": {
+    "name": "Ollesia",
+    "kr": "오레시아",
+    "string_id": "ollesia",
+    "converter_name": "[@ollesia]"
+  },
+  "douglas": {
+    "name": "Douglas",
+    "kr": "더글라스",
+    "string_id": "douglas",
+    "converter_name": "[@douglas]"
+  },
+  "muse": {
+    "name": "Muse",
+    "kr": "뮤즈",
+    "string_id": "muse",
+    "converter_name": "[@muse]"
+  },
+  "rael": {
+    "name": "Rael",
+    "kr": "라엘",
+    "string_id": "rael",
+    "converter_name": "[@rael]"
+  },
+  "elenoa": {
+    "name": "Elenoa",
+    "kr": "엘레노아",
+    "string_id": "elenoa",
+    "converter_name": "[@elenoa]"
+  },
+  "martie": {
+    "name": "Martie",
+    "kr": "마티",
+    "string_id": "martie",
+    "converter_name": "[@martie]"
+  },
+  "rouca": {
+    "name": "Rouca",
+    "kr": "루카",
+    "string_id": "rouca",
+    "converter_name": "[@rouca]"
+  },
+  "rutice": {
+    "name": "Rutice",
+    "kr": "루티스",
+    "string_id": "rutice",
+    "converter_name": "[@rutice]"
+  },
+  "lucias": {
+    "name": "Lucias",
+    "kr": "루키어스",
+    "string_id": "lucias",
+    "converter_name": "[@lucias]"
+  },
+  "duorl": {
+    "name": "Duorl",
+    "kr": "듀올",
+    "string_id": "duorl",
+    "converter_name": "[@duorl]"
+  },
+  "stigma": {
+    "name": "Stigma",
+    "kr": "스티그마",
+    "string_id": "stigma",
+    "converter_name": "[@stigma]"
+  },
+  "jurio": {
+    "name": "Jurio",
+    "kr": "쥬리오",
+    "string_id": "jurio",
+    "converter_name": "[@jurio]"
+  },
+  "chris": {
+    "name": "Chris",
+    "kr": "크리스",
+    "string_id": "chris",
+    "converter_name": "[@chris]"
+  },
+  "shirla": {
+    "name": "Shirla",
+    "kr": "사라",
+    "string_id": "shirla",
+    "converter_name": "[@shirla]"
+  },
+  "goose": {
+    "name": "Goose",
+    "kr": "구스",
+    "string_id": "goose",
+    "converter_name": "[@goose]"
+  },
+  "lap": {
+    "name": "Lap",
+    "kr": "라프 할아버지",
+    "string_id": "lap",
+    "converter_name": "[@lap]"
+  },
+  "huck": {
+    "name": "Huck",
+    "kr": "허크",
+    "string_id": "huck",
+    "converter_name": "[@huck]"
+  },
+  "henchmen": {
+    "name": "Henchmen",
+    "kr": "부하들",
+    "string_id": "henchmen",
+    "converter_name": "[@henchmen]"
+  },
+  "jimmy": {
+    "name": "Jimmy",
+    "kr": "지미",
+    "string_id": "jimmy",
+    "converter_name": "[@jimmy]"
+  },
+  "lita": {
+    "name": "Lita",
+    "kr": "리타",
+    "string_id": "lita",
+    "converter_name": "[@lita]"
+  },
+  "godal": {
+    "name": "Godal",
+    "kr": "고달 촌장",
+    "string_id": "godal",
+    "converter_name": "[@godal]"
+  },
+  "cerine": {
+    "name": "Cerine",
+    "kr": "세리누",
+    "string_id": "cerine",
+    "converter_name": "[@cerine]"
+  },
+  "oscar": {
+    "name": "Oscar",
+    "kr": "오스카",
+    "string_id": "oscar",
+    "converter_name": "[@oscar]"
+  },
+  "ulma": {
+    "name": "Ulma",
+    "kr": "울마",
+    "string_id": "ulma",
+    "converter_name": "[@ulma]"
+  },
+  "anri": {
+    "name": "Anri",
+    "kr": "안리",
+    "string_id": "anri",
+    "converter_name": "[@anri]"
+  },
+  "jeral": {
+    "name": "Jeral",
+    "kr": "제랄",
+    "string_id": "jeral",
+    "converter_name": "[@jeral]"
+  },
+  "lune": {
+    "name": "Lune",
+    "kr": "루네",
+    "string_id": "lune",
+    "converter_name": "[@lune]"
+  },
+  "rovell": {
+    "name": "Rovell",
+    "kr": "로벨",
+    "string_id": "rovell",
+    "converter_name": "[@rovell]"
+  },
+  "fatima": {
+    "name": "Fatima",
+    "kr": "파티마",
+    "string_id": "fatima",
+    "converter_name": "[@fatima]"
+  },
+  "mrs_milabo": {
+    "name": "Mrs Milabo",
+    "kr": "미라보 부인",
+    "string_id": "mrs_milabo",
+    "converter_name": "[@mrs_milabo]"
+  },
+  "ronald": {
+    "name": "Ronald",
+    "kr": "로날드",
+    "string_id": "ronald",
+    "converter_name": "[@ronald]"
+  },
+  "sorcier": {
+    "name": "Sorcier",
+    "kr": "소시에",
+    "string_id": "sorcier",
+    "converter_name": "[@sorcier]"
+  },
+  "mei": {
+    "name": "Mei",
+    "kr": "메이",
+    "string_id": "mei",
+    "converter_name": "[@mei]"
+  },
+  "loretta": {
+    "name": "Loretta",
+    "kr": "로레타",
+    "string_id": "loretta",
+    "converter_name": "[@loretta]"
+  },
+  "henchman1": {
+    "name": "Henchman1",
+    "kr": "부하1",
+    "string_id": "henchman1",
+    "converter_name": "[@henchman1]"
+  },
+  "henchman2": {
+    "name": "Henchman2",
+    "kr": "부하2",
+    "string_id": "henchman2",
+    "converter_name": "[@henchman2]"
+  },
+  "henchman3": {
+    "name": "Henchman3",
+    "kr": "부하3",
+    "string_id": "henchman3",
+    "converter_name": "[@henchman3]"
+  },
+  "henchman4": {
+    "name": "Henchman4",
+    "kr": "부하4",
+    "string_id": "henchman4",
+    "converter_name": "[@henchman4]"
+  },
+  "henchman5": {
+    "name": "Henchman5",
+    "kr": "부하5",
+    "string_id": "henchman5",
+    "converter_name": "[@henchman5]"
+  },
+  "henchman6": {
+    "name": "Henchman6",
+    "kr": "부하6",
+    "string_id": "henchman6",
+    "converter_name": "[@henchman6]"
+  },
+  "castle": {
+    "name": "Castle",
+    "kr": "카스톨",
+    "string_id": "castle",
+    "converter_name": "[@castle]"
+  },
+  "youngman_1": {
+    "name": "Youngman 1",
+    "kr": "청년1",
+    "string_id": "youngman_1",
+    "converter_name": "[@youngman_1]"
+  },
+  "youngman_2": {
+    "name": "Youngman 2",
+    "kr": "청년2",
+    "string_id": "youngman_2",
+    "converter_name": "[@youngman_2]"
+  },
+  "village_chief": {
+    "name": "Village Chief",
+    "kr": "촌장",
+    "string_id": "village_chief",
+    "converter_name": "[@village_chief]"
+  },
+  "bandit_leader": {
+    "name": "Bandit Leader",
+    "kr": "도적단 두목",
+    "string_id": "bandit_leader",
+    "converter_name": "[@bandit_leader]"
+  },
+  "bandit_unit": {
+    "name": "Bandit Unit",
+    "kr": "도적단원",
+    "string_id": "bandit_unit",
+    "converter_name": "[@bandit_unit]"
+  },
+  "child": {
+    "name": "Child",
+    "kr": "아이",
+    "string_id": "child",
+    "converter_name": "[@child]"
+  },
+  "alf": {
+    "name": "Alf",
+    "kr": "알프",
+    "string_id": "alf",
+    "converter_name": "[@alf]"
+  },
+  "fisherman_tobai": {
+    "name": "Fisherman Tobai",
+    "kr": "어부 토바이",
+    "string_id": "fisherman_tobai",
+    "converter_name": "[@fisherman_tobai]"
+  },
+  "sage_tegura": {
+    "name": "Sage Tegura",
+    "kr": "테그라의 현자",
+    "string_id": "sage_tegura",
+    "converter_name": "[@sage_tegura]"
+  },
+  "miner_robe": {
+    "name": "Miner Robe",
+    "kr": "광부 로브",
+    "string_id": "miner_robe",
+    "converter_name": "[@miner_robe]"
+  },
+  "miner_ted": {
+    "name": "Miner Ted",
+    "kr": "광부 테드",
+    "string_id": "miner_ted",
+    "converter_name": "[@miner_ted]"
+  },
+  "miner_bori": {
+    "name": "Miner Bori",
+    "kr": "광부 보리",
+    "string_id": "miner_bori",
+    "converter_name": "[@miner_bori]"
+  },
+  "miner_ile": {
+    "name": "Miner Ile",
+    "kr": "광부 아일",
+    "string_id": "miner_ile",
+    "converter_name": "[@miner_ile]"
+  },
+  "emena": {
+    "name": "Emena",
+    "kr": "에메나",
+    "string_id": "emena",
+    "converter_name": "[@emena]"
+  },
+  "keeper_viano": {
+    "name": "Keeper Viano",
+    "kr": "창고지기 비아노",
+    "string_id": "keeper_viano",
+    "converter_name": "[@keeper_viano]"
+  },
+  "inta": {
+    "name": "Inta",
+    "kr": "인타",
+    "string_id": "inta",
+    "converter_name": "[@inta]"
+  },
+  "limu": {
+    "name": "Limu",
+    "kr": "리무",
+    "string_id": "limu",
+    "converter_name": "[@limu]"
+  },
+  "alfred": {
+    "name": "Alfred",
+    "kr": "알프레드",
+    "string_id": "alfred",
+    "converter_name": "[@alfred]"
+  },
+  "lodi": {
+    "name": "Lodi",
+    "kr": "로디",
+    "string_id": "lodi",
+    "converter_name": "[@lodi]"
+  },
+  "old_man_ugana": {
+    "name": "Old Man Ugana",
+    "kr": "우가나 노인",
+    "string_id": "old_man_ugana",
+    "converter_name": "[@old_man_ugana]"
+  },
+  "gene": {
+    "name": "Gene",
+    "kr": "제네 할머니",
+    "string_id": "gene",
+    "converter_name": "[@gene]"
+  },
+  "morrison": {
+    "name": "Morrison",
+    "kr": "모리슨",
+    "string_id": "morrison",
+    "converter_name": "[@morrison]"
+  },
+  "lure": {
+    "name": "Lure",
+    "kr": "루레",
+    "string_id": "lure",
+    "converter_name": "[@lure]"
+  },
+  "red": {
+    "name": "Red",
+    "kr": "레드",
+    "string_id": "red",
+    "converter_name": "[@red]"
+  },
+  "magisa": {
+    "name": "Magisa",
+    "kr": "마기사",
+    "string_id": "magisa",
+    "converter_name": "[@magisa]"
+  },
+  "village_girl": {
+    "name": "Village Girl",
+    "kr": "여자",
+    "string_id": "village_girl",
+    "converter_name": "[@village_girl]"
+  },
+  "village_man1": {
+    "name": "Village Man1",
+    "kr": "여자1",
+    "string_id": "village_man1",
+    "converter_name": "[@village_man1]"
+  },
+  "village_man2": {
+    "name": "Village Man2",
+    "kr": "여자2",
+    "string_id": "village_man2",
+    "converter_name": "[@village_man2]"
+  },
+  "village_girl1": {
+    "name": "Village Girl1",
+    "kr": "남자1",
+    "string_id": "village_girl1",
+    "converter_name": "[@village_girl1]"
+  },
+  "village_girl2": {
+    "name": "Village Girl2",
+    "kr": "남자2",
+    "string_id": "village_girl2",
+    "converter_name": "[@village_girl2]"
+  },
+  "soldier": {
+    "name": "Soldier",
+    "kr": "병사",
+    "string_id": "soldier",
+    "converter_name": "[@soldier]"
+  },
+  "tonica": {
+    "name": "Tonica",
+    "kr": "토니카",
+    "string_id": "tonica",
+    "converter_name": "[@tonica]"
+  },
+  "teazel": {
+    "name": "Teazel",
+    "kr": "티젤",
+    "string_id": "teazel",
+    "converter_name": "[@teazel]"
+  },
+  "chanom_soldier": {
+    "name": "Chanom Soldier",
+    "kr": "챠놈의 병사",
+    "string_id": "chanom_soldier",
+    "converter_name": "[@chanom_soldier]"
+  },
+  "mayer": {
+    "name": "Mayer",
+    "kr": "마이어",
+    "string_id": "mayer",
+    "converter_name": "[@mayer]"
+  },
+  "security": {
+    "name": "Security",
+    "kr": "경호원",
+    "string_id": "security",
+    "converter_name": "[@security]"
+  },
+  "polare": {
+    "name": "Polare",
+    "kr": "여관주인 폴라레",
+    "string_id": "polare",
+    "converter_name": "[@polare]"
+  },
+  "keulowa": {
+    "name": "Keulowa",
+    "kr": "크로와 할머니",
+    "string_id": "keulowa",
+    "converter_name": "[@keulowa]"
+  },
+  "annecy": {
+    "name": "Annecy",
+    "kr": "안시",
+    "string_id": "annecy",
+    "converter_name": "[@annecy]"
+  },
+  "troba": {
+    "name": "Troba",
+    "kr": "연주가 트로바",
+    "string_id": "troba",
+    "converter_name": "[@troba]"
+  },
+  "mayor_nap": {
+    "name": "Mayor Nap",
+    "kr": "냅 촌장",
+    "string_id": "mayor_nap",
+    "converter_name": "[@mayor_nap]"
+  },
+  "hasre": {
+    "name": "Hasre",
+    "kr": "하스레",
+    "string_id": "hasre",
+    "converter_name": "[@hasre]"
+  },
+  "zennu": {
+    "name": "Zennu",
+    "kr": "젠누",
+    "string_id": "zennu",
+    "converter_name": "[@zennu]"
+  },
+  "brain": {
+    "name": "Brain",
+    "kr": "브레인",
+    "string_id": "brain",
+    "converter_name": "[@brain]"
+  },
+  "porishe": {
+    "name": "Porishe",
+    "kr": "포리쉐",
+    "string_id": "porishe",
+    "converter_name": "[@porishe]"
+  },
+  "baron": {
+    "name": "Baron",
+    "kr": "바론",
+    "string_id": "baron",
+    "converter_name": "[@baron]"
+  },
+  "ambisch_soldier": {
+    "name": "Ambisch Soldier",
+    "kr": "엠비쉬 병사",
+    "string_id": "ambisch_soldier",
+    "converter_name": "[@ambisch_soldier]"
+  },
+  "isabelle": {
+    "name": "Isabelle",
+    "kr": "이자벨",
+    "string_id": "isabelle",
+    "converter_name": "[@isabelle]"
+  },
+  "revas_xiv": {
+    "name": "Revas Xiv",
+    "kr": "레바스 14세",
+    "string_id": "revas_xiv",
+    "converter_name": "[@revas_xiv]"
+  },
+  "another_durzel": {
+    "name": "Another Durzel",
+    "kr": "근위병단장",
+    "string_id": "another_durzel",
+    "converter_name": "[@another_durzel]"
+  },
+  "king_rudolf": {
+    "name": "King Rudolf",
+    "kr": "루돌프 왕",
+    "string_id": "king_rudolf",
+    "converter_name": "[@king_rudolf]"
+  },
+  "royal_guard": {
+    "name": "Royal Guard",
+    "kr": "친위병",
+    "string_id": "royal_guard",
+    "converter_name": "[@royal_guard]"
+  },
+  "sage_of_dine": {
+    "name": "Sage Of Dine",
+    "kr": "현자",
+    "string_id": "sage_of_dine",
+    "converter_name": "[@sage_of_dine]"
+  },
+  "resident1": {
+    "name": "Resident1",
+    "kr": "주민1",
+    "string_id": "resident1",
+    "converter_name": "[@resident1]"
+  },
+  "resident2": {
+    "name": "Resident2",
+    "kr": "주민2",
+    "string_id": "resident2",
+    "converter_name": "[@resident2]"
+  },
+  "resident3": {
+    "name": "Resident3",
+    "kr": "주민3",
+    "string_id": "resident3",
+    "converter_name": "[@resident3]"
+  },
+  "serious": {
+    "name": "Serious",
+    "kr": "근엄한 목소리",
+    "string_id": "serious",
+    "converter_name": "[@serious]"
+  },
+  "shao": {
+    "name": "Shao",
+    "kr": "샤오",
+    "string_id": "shao",
+    "converter_name": "[@shao]"
+  },
+  "rachel": {
+    "name": "Rachel",
+    "kr": "레이첼",
+    "string_id": "rachel",
+    "converter_name": "[@rachel]"
+  },
+  "palman": {
+    "name": "Palman",
+    "kr": "팔만",
+    "string_id": "palman",
+    "converter_name": "[@palman]"
+  },
+  "zenon": {
+    "name": "Zenon",
+    "kr": "제논",
+    "string_id": "zenon",
+    "converter_name": "[@zenon]"
+  },
+  "necross": {
+    "name": "Necross",
+    "kr": "네크로스",
+    "string_id": "necross",
+    "converter_name": "[@necross]"
+  },
+  "ambassador_bragger": {
+    "name": "Ambassador Bragger",
+    "kr": "브래거 대사",
+    "string_id": "ambassador_bragger",
+    "converter_name": "[@ambassador_bragger]"
+  },
+  "marshu": {
+    "name": "Marshu",
+    "kr": "마슈",
+    "string_id": "marshu",
+    "converter_name": "[@marshu]"
+  },
+  "mrs_meritos": {
+    "name": "Mrs Meritos",
+    "kr": "메리토스",
+    "string_id": "mrs_meritos",
+    "converter_name": "[@mrs_meritos]"
   }
 }

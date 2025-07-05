@@ -1,7 +1,9 @@
 import pandas as pd
 import re
 import os
-import json
+import json        
+# google_sheets_manager.py 파일 상단에 추가
+import streamlit as st
 
 # 구글 시트 라이브러리 선택적 가져오기
 try:
@@ -28,35 +30,39 @@ class GoogleSheetsManager:
         self.service_account_file = service_account_file
         self.gc = None
         self._initialize_client()
-    
+
+    # _initialize_client 함수를 아래 내용으로 수정
     def _initialize_client(self):
         """
-        구글 시트 클라이언트 초기화 (읽기/쓰기 권한 포함)
+        구글 시트 클라이언트 초기화 (Streamlit Secrets 우선)
         """
         if not GSPREAD_AVAILABLE:
-            # 라이브러리가 설치되지 않은 경우
             self.gc = None
             return False
-            
+
         try:
-            if os.path.exists(self.service_account_file):
-                # Service Account 키 파일이 있는 경우 (읽기/쓰기 권한 추가)
+            # 1. Streamlit Secrets에서 설정 로드 (배포 환경)
+            if "gcp_service_account" in st.secrets:
+                creds_json = st.secrets["gcp_service_account"]
                 scope = [
-                    'https://www.googleapis.com/auth/spreadsheets',  # 읽기/쓰기 권한
-                    'https://www.googleapis.com/auth/drive'  # 드라이브 접근 권한
+                    'https://www.googleapis.com/auth/spreadsheets',
+                    'https://www.googleapis.com/auth/drive'
                 ]
-                
-                credentials = Credentials.from_service_account_file(
-                    self.service_account_file, 
-                    scopes=scope
-                )
+                credentials = Credentials.from_service_account_info(creds_json, scopes=scope)
+                self.gc = gspread.authorize(credentials)
+                return True
+            # 2. 로컬 파일에서 설정 로드 (개발 환경)
+            elif os.path.exists(self.service_account_file):
+                scope = [
+                    'https://www.googleapis.com/auth/spreadsheets',
+                    'https://www.googleapis.com/auth/drive'
+                ]
+                credentials = Credentials.from_service_account_file(self.service_account_file, scopes=scope)
                 self.gc = gspread.authorize(credentials)
                 return True
             else:
-                # 키 파일이 없는 경우
                 self.gc = None
                 return False
-                
         except Exception as e:
             print(f"구글 시트 클라이언트 초기화 오류: {e}")
             self.gc = None
