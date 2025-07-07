@@ -195,14 +195,11 @@ with main_tab:
                         st.rerun()
 
         st.write("#### ✨ 성공 및 경고 스크립트 모음 (복사 전용)")
-        successful_scripts = result_df[result_df['상태'].isin(['success', 'warning'])]['변환 스크립트'].tolist()
-        
+        successful_scripts = st.session_state.result_df[st.session_state.result_df['상태'].isin(['success', 'warning'])]['변환 스크립트'].tolist()
         if successful_scripts:
             final_script_text = "\n\n".join(successful_scripts)
-            st.text_area("결과 스크립트", value=final_script_text, height=400)
-            if st.button("📋 스크립트 복사"):
-                pyperclip.copy(final_script_text)
-                st.success("결과 스크립트가 클립보드에 복사되었습니다!")
+            # text_area와 button 대신, 복사 버튼이 내장된 st.code 사용
+            st.code(final_script_text, language="text")
         else:
             st.warning("복사할 수 있는 성공적인 스크립트가 없습니다.")
 
@@ -374,13 +371,31 @@ with settings_tab:
                 st.markdown("---")
         with st.expander("➕ 새 지시문 규칙 추가"):
             new_dir_type = st.selectbox("규칙 타입", ["simple", "template"], help="simple: 고정 텍스트, template: 시트 내용 참조", key="dir_type_selector")
+            
             with st.form("add_dir_form", clear_on_submit=True):
                 new_dir_name = st.text_input("지시문 이름", help="예: 장면, 효과음")
+                
                 if new_dir_type == "simple":
                     new_dir_template = st.text_input("변환될 텍스트", help="예: 장면_묘사()")
-                else:
+                else: # template
                     new_dir_template = st.text_area("변환 템플릿", height=150, help='예: 효과음_재생("0.1", "{{사운드 주소}}{{사운드 파일}}")\n- 줄바꿈은 \\n을 사용하세요.\n- {컬럼명}을 입력하려면 {{컬럼명}}처럼 중괄호를 두 번 사용해야 합니다.')
+                
                 if st.form_submit_button("규칙 추가"):
                     success, msg = settings_manager.add_directive_rule(new_dir_name, new_dir_type, new_dir_template)
                     if success: st.success(msg); st.rerun()
                     else: st.error(msg)
+            
+            # [수정] 템플릿 변수 복사 UI를 st.code를 사용하는 방식으로 변경
+            if new_dir_type == 'template':
+                if st.session_state.sheet_data is not None:
+                    st.info("💡 **사용 가능한 템플릿 변수 (클릭하여 복사):**")
+                    valid_columns = [col for col in st.session_state.sheet_data.columns if col and not col.startswith('unnamed:')]
+                    
+                    # 컬럼을 4열로 나누어 표시
+                    cols = st.columns(4)
+                    for i, col_name in enumerate(valid_columns):
+                        with cols[i % 4]:
+                            # 각 컬럼명을 st.code로 감싸면 자동으로 복사 버튼이 생김
+                            st.code(f"{{{{{col_name}}}}}", language="text")
+                else:
+                    st.warning("템플릿에 사용할 컬럼 목록을 보려면, 먼저 '변환 작업' 탭에서 데이터를 불러와주세요.")
