@@ -194,12 +194,24 @@ with main_tab:
                         st.info("캐릭터 추가 후, [변환 실행] 버튼을 다시 눌러 결과를 갱신하세요.")
                         st.rerun()
 
-        st.write("#### ✨ 성공 및 경고 스크립트 모음 (복사 전용)")
+        st.write("#### ✨ 성공 및 경고 스크립트 모음")
         successful_scripts = st.session_state.result_df[st.session_state.result_df['상태'].isin(['success', 'warning'])]['변환 스크립트'].tolist()
         if successful_scripts:
             final_script_text = "\n\n".join(successful_scripts)
-            # text_area와 button 대신, 복사 버튼이 내장된 st.code 사용
-            st.code(final_script_text, language="text")
+            
+            # 복사 가능한 텍스트 영역
+            st.text_area(
+                "📋 변환된 스크립트 (전체 선택: Ctrl+A, 복사: Ctrl+C)", 
+                value=final_script_text, 
+                height=300, 
+                key="final_script_display",
+                help="이 영역의 텍스트를 모두 선택(Ctrl+A)한 후 복사(Ctrl+C)하세요."
+            )
+            
+            # 스크립트 통계 정보
+            script_lines = final_script_text.count('\n') + 1
+            script_blocks = len(successful_scripts)
+            st.info(f"📊 총 {script_blocks}개 변환 결과, {script_lines}줄의 스크립트가 생성되었습니다.")
         else:
             st.warning("복사할 수 있는 성공적인 스크립트가 없습니다.")
 

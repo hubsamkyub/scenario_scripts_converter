@@ -14,15 +14,29 @@ class ConverterLogic:
         self.builtin_rules = {"대사": self._convert_dialogue}
 
     def _apply_template(self, template, row):
-        """[수정] {{컬럼명}} 형태의 placeholder를 인식하도록 정규식 변경"""
-        # 정규식을 수정하여 {{...}} 안의 내용만 찾도록 함
+        """[수정] {{컬럼명}} 형태의 placeholder를 인식하고, #{{컬럼명}} 패턴에 자동 개행 처리 적용"""
+        # 1. #{{컬럼명}} 패턴 찾기 (개행 처리 적용용)
+        comment_placeholders = re.findall(r'#\{\{(.+?)\}\}', template)
+        
+        # 2. 일반 {{컬럼명}} 패턴 찾기
         placeholders = re.findall(r'\{\{(.+?)\}\}', template)
         result = template
         
+        # 3. #{{컬럼명}} 패턴 먼저 처리 (개행 처리 적용)
+        for ph in comment_placeholders:
+            raw_value = row.get(ph.strip().lower(), f'{{{{{ph}}}}}')
+            if raw_value != f'{{{{{ph}}}}}':  # 값이 존재하는 경우만 개행 처리
+                cleaned_value = self._clean_dialogue_text(raw_value)
+                result = result.replace(f'#{{{{{ph}}}}}', f'#{cleaned_value}')
+        
+        # 4. 나머지 일반 {{컬럼명}} 패턴 처리
         for ph in placeholders:
-            value = row.get(ph.strip().lower(), f'{{{{{ph}}}}}') # 값을 못찾으면 원래 형태로 복원
-            result = result.replace(f'{{{{{ph}}}}}', str(value))
-            
+            # #{{컬럼명}}은 이미 처리했으므로 건너뛰기
+            if f'#{{{{{ph}}}}}' not in template or f'#{{{{{ph}}}}}' not in result:
+                value = row.get(ph.strip().lower(), f'{{{{{ph}}}}}')
+                result = result.replace(f'{{{{{ph}}}}}', str(value))
+        
+        # 5. \n을 실제 개행으로 변환
         result = result.replace('\\n', '\n')
         return result
 
