@@ -7,11 +7,11 @@ class ConverterLogic:
     지시문별 규칙과 상세 리포팅을 처리하는 클래스 (v2.4)
     """
     def __init__(self, character_manager, portrait_sound_manager, settings_manager):
-        # [함수명: __init__]: 변경 없음
+        # [함수명: __init__]: "자막" 규칙 제거
         self.character_manager = character_manager
         self.ps_manager = portrait_sound_manager
         self.settings_manager = settings_manager
-        self.builtin_rules = {"대사": self._convert_dialogue, "자막": self._convert_subtitle}
+        self.builtin_rules = {"대사": self._convert_dialogue}
 
     def _apply_template(self, template, row):
         """[수정] {{컬럼명}} 형태의 placeholder를 인식하도록 정규식 변경"""
@@ -71,33 +71,6 @@ class ConverterLogic:
         line1 = f'스토리_대화상자_추가("[@{char_string_id}]","[@{dialogue_string_id}]","{portrait_path}","{sound_path}")'
         line2 = f'#{self._clean_dialogue_text(row.get("대사", ""))}' # 수정된 부분
         line3 = '대기()'
-        result_text = f"{line1}\n{line2}\n{line3}"
-        status = "warning" if messages else "success"
-        message_text = " | ".join(messages) if messages else "성공"
-        return {"status": status, "result": result_text, "message": message_text}
-
-    def _convert_subtitle(self, row):
-        """
-        [수정] 자막의 대사 텍스트를 _clean_dialogue_text 함수로 처리합니다.
-        """
-        messages = []
-        # 1. 자막 STRING_ID 검증 및 자동 생성
-        subtitle_string_id = row.get('string_id', '')
-        if not subtitle_string_id or (isinstance(subtitle_string_id, str) and subtitle_string_id.strip() == ''):
-            subtitle_string_id = self._generate_fallback_string_id(row)
-            if not subtitle_string_id:
-                return {"status": "error", "result": "# [오류] STRING_ID가 비어있고, ID 생성에 필요한 '사운드 파일'도 없습니다.", "message": "ID 생성 불가"}
-            messages.append("경고: 'STRING_ID'가 비어있어 '사운드 파일' 기준으로 자동 생성했습니다.")
-        
-        # 2. 사운드 경로 생성
-        sound_address = row.get('사운드 주소', '')
-        sound_file = row.get('사운드 파일', '')
-        sound_path = self.ps_manager.generate_sound_path(sound_address, sound_file)
-
-        # 3. 최종 3줄 텍스트 조합 (대사 클리닝 적용)
-        line1 = f'나레이션_텍스트("[@{subtitle_string_id}]","","","","{sound_path}")'
-        line2 = f'#{self._clean_dialogue_text(row.get("대사", ""))}' # 수정된 부분
-        line3 = '지연(0)'
         result_text = f"{line1}\n{line2}\n{line3}"
         status = "warning" if messages else "success"
         message_text = " | ".join(messages) if messages else "성공"
