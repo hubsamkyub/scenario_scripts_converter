@@ -242,37 +242,63 @@ with char_tab:
         with col_list:
             st.write("**등록된 캐릭터 목록**")
             characters_df = char_manager.get_characters_dataframe()
+            
+            # [신규] 빈 string_id 행들이 이미 CharacterManager에서 필터링되었지만, 추가 안전장치
+            if not characters_df.empty:
+                # 유효한 string_id만 가진 행들로 추가 필터링
+                valid_characters_df = characters_df[
+                    (characters_df['string_id'].notna()) & 
+                    (characters_df['string_id'].str.strip() != '') &
+                    (characters_df['string_id'] != 'nan')
+                ].copy()
+                
+                # 인덱스 재설정
+                valid_characters_df.reset_index(drop=True, inplace=True)
+                
+                # 원본 데이터와 필터링된 데이터 비교하여 정보 표시
+                original_count = len(characters_df)
+                valid_count = len(valid_characters_df)
+                if original_count > valid_count:
+                    st.info(f"📊 전체 {original_count}행 중 유효한 캐릭터 {valid_count}개를 표시합니다. (빈 행 {original_count - valid_count}개 제외)")
+            else:
+                valid_characters_df = characters_df
+            
             search_term = st.text_input("🔍 캐릭터 검색 (이름 또는 KR)", placeholder="이름으로 검색...", key="char_search")
             
             if search_term:
                 search_term_lower = search_term.lower()
                 # DataFrame에 'name'과 'kr' 컬럼이 있는지 확인 후 검색
-                if 'name' in characters_df.columns and 'kr' in characters_df.columns:
-                    filtered_df = characters_df[
-                        characters_df['name'].str.lower().str.contains(search_term_lower) | 
-                        characters_df['kr'].str.lower().str.contains(search_term_lower)
+                if 'name' in valid_characters_df.columns and 'kr' in valid_characters_df.columns:
+                    filtered_df = valid_characters_df[
+                        valid_characters_df['name'].str.lower().str.contains(search_term_lower, na=False) | 
+                        valid_characters_df['kr'].str.lower().str.contains(search_term_lower, na=False)
                     ]
                 else:
-                    filtered_df = characters_df
+                    filtered_df = valid_characters_df
             else:
-                filtered_df = characters_df
+                filtered_df = valid_characters_df
             
             if not filtered_df.empty:
-                for _, row in filtered_df.iterrows():
+                for idx, row in filtered_df.iterrows():
                     # 컬럼 이름이 소문자로 통일되었으므로, 소문자로 접근
                     char_id = row['string_id']
-                    char_name_en = row['name']
-                    char_name_kr = row['kr']
+                    char_name_en = row['name'] if pd.notna(row['name']) else ""
+                    char_name_kr = row['kr'] if pd.notna(row['kr']) else ""
+                    
+                    # [신규] 추가 안전장치: char_id가 여전히 비어있다면 인덱스 사용
+                    if not char_id or str(char_id).strip() == "" or str(char_id) == 'nan':
+                        char_id = f"empty_id_{idx}"
                     
                     with st.container():
                         c1, c2, c3 = st.columns([4, 1, 1])
                         c1.markdown(f"**{char_name_en}** ({char_name_kr}) - `ID: {char_id}`")
                         
-                        if c2.button("✏️", key=f"edit_{char_id}", help="수정"):
+                        # [수정] 중복 key 방지를 위해 idx 추가
+                        if c2.button("✏️", key=f"edit_{char_id}_{idx}", help="수정"):
                             st.session_state.editing_char_id = char_id
                             st.rerun()
                             
-                        if c3.button("🗑️", key=f"delete_{char_id}", help="삭제"):
+                        if c3.button("🗑️", key=f"delete_{char_id}_{idx}", help="삭제"):
                             success, msg = char_manager.delete_character(char_id)
                             if success:
                                 st.success(msg)
@@ -282,7 +308,8 @@ with char_tab:
                                 st.error(msg)
 
                         if st.session_state.editing_char_id == char_id:
-                            with st.form(key=f"edit_form_{char_id}"):
+                            # [수정] 중복 key 방지를 위해 idx 추가
+                            with st.form(key=f"edit_form_{char_id}_{idx}"):
                                 st.markdown(f"**✏️ '{char_name_en}' 정보 수정**")
                                 new_name = st.text_input("Name", value=char_name_en)
                                 new_kr = st.text_input("KR", value=char_name_kr)
