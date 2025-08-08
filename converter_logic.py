@@ -22,11 +22,11 @@ class ConverterLogic:
         placeholders = re.findall(r'\{\{(.+?)\}\}', template)
         result = template
         
-        # 3. #{{컬럼명}} 패턴 먼저 처리 (개행 처리 적용)
+        # 3. #{{컬럼명}} 패턴 먼저 처리 (개행을 공백으로 치환)
         for ph in comment_placeholders:
             raw_value = row.get(ph.strip().lower(), f'{{{{{ph}}}}}')
             if raw_value != f'{{{{{ph}}}}}':  # 값이 존재하는 경우만 개행 처리
-                cleaned_value = self._clean_dialogue_text(raw_value)
+                cleaned_value = self._clean_comment_text(raw_value)  # 새로운 함수 사용
                 result = result.replace(f'#{{{{{ph}}}}}', f'#{cleaned_value}')
         
         # 4. 나머지 일반 {{컬럼명}} 패턴 처리
@@ -44,6 +44,15 @@ class ConverterLogic:
     def _clean_dialogue_text(self, text):
         if not isinstance(text, str): return ""
         return text.replace('\n', '\\n').replace('\r', '')
+
+    def _clean_comment_text(self, text):
+        """#{{컬럼명}} 패턴 전용: 개행을 공백으로 치환하여 한 줄로 만듭니다"""
+        if not isinstance(text, str): return ""
+        # 개행 문자들을 공백으로 치환하고, 연속된 공백을 하나로 정리
+        cleaned = text.replace('\n', ' ').replace('\r', ' ')
+        # 연속된 공백을 하나로 정리
+        cleaned = ' '.join(cleaned.split())
+        return cleaned
 
     def _generate_fallback_string_id(self, row):
         sound_file = row.get('사운드 파일', '')
