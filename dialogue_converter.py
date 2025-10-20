@@ -16,8 +16,9 @@ def get_sheets_manager():
     """Google API 클라이언트는 앱 세션 동안 한 번만 생성합니다."""
     return GoogleSheetsManager()
 
-def init_data_managers(_sheets_manager, _settings_url):
-    """URL과 API 클라이언트가 모두 준비되었을 때 데이터 관리자들을 초기화합니다."""
+@st.cache_resource
+def get_cached_managers(_sheets_manager, _settings_url):
+    """매니저들을 캐싱하여 API 호출 최소화"""
     if _sheets_manager and _sheets_manager.is_available() and _settings_url:
         try:
             char_manager = CharacterManager(_sheets_manager.gc, _settings_url)
@@ -83,11 +84,13 @@ if settings_url_input != st.session_state.settings_url:
     st.rerun()
 
 # 2. 클라이언트와 URL을 바탕으로 데이터 매니저 생성
-char_manager, settings_manager, ps_manager, converter = init_data_managers(
+char_manager, settings_manager, ps_manager, converter = get_cached_managers(
     sheets_manager, st.session_state.settings_url
 )
 
 if st.sidebar.button("⚙️ 설정 및 캐릭터 새로고침"):
+    # 캐시 삭제
+    get_cached_managers.clear()
     st.toast("최신 설정과 캐릭터 목록을 다시 불러옵니다.")
     st.rerun()
     
