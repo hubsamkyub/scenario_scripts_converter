@@ -83,6 +83,12 @@ main_tab, char_tab, settings_tab = st.tabs(["🔄 변환 작업", "👥 캐릭�
 # ===== 메인 변환 탭 =====
 # =======================
 with main_tab:
+    # 세션 초기화 버튼 추가 (여기에 추가)
+    if st.button("🔄 세션 초기화", help="문제 발생 시 클릭"):
+        st.session_state.result_df = None
+        st.session_state.sheet_data = None
+        st.rerun()
+            
     if not settings_manager:
         st.error("설정 시트 연결에 실패했습니다. 사이드바의 상태 정보를 확인하세요.")
     else:
@@ -110,6 +116,7 @@ with main_tab:
             selected_sheet = st.selectbox("목록에서 시트를 선택하세요.", options=[""] + st.session_state.sheet_names, index=0, key="sheet_selector")
             if selected_sheet and selected_sheet != st.session_state.selected_sheet:
                 st.session_state.selected_sheet = selected_sheet
+                st.session_state.result_df = None  # 시트 변경 시 결과 초기화
                 with st.spinner(f"'{selected_sheet}' 시트 데이터를 불러오는 중..."):
                     success, message, df = sheets_manager.read_sheet_data(st.session_state.current_url, selected_sheet)
                     if success:
@@ -129,11 +136,18 @@ with main_tab:
             selected_scene = st.selectbox("변환할 씬 번호를 선택하세요.", options=st.session_state.scene_numbers, key="scene_selector")
             if selected_scene:
                 scene_df = st.session_state.sheet_data[pd.to_numeric(st.session_state.sheet_data['씬 번호'], errors='coerce') == selected_scene].copy()
-                with st.expander(f"씬 {selected_scene} 데이터 미리보기 ({len(scene_df)} 행)", expanded=False): st.dataframe(scene_df)
+                with st.expander(f"씬 {selected_scene} 데이터 미리보기 ({len(scene_df)} 행)", expanded=False): 
+                    st.dataframe(scene_df)
+                
                 if st.button("🚀 변환 실행", type="primary", use_container_width=True):
+                    # 변환 전 명시적으로 이전 결과 초기화 (여기에 추가)
+                    st.session_state.result_df = None
+                    
                     with st.spinner(f"씬 {selected_scene} 변환 중..."):
                         conversion_results = converter.convert_scene_data(scene_df)
-                        scene_df['상태'] = [res['status'] for res in conversion_results]; scene_df['결과 메시지'] = [res['message'] for res in conversion_results]; scene_df['변환 스크립트'] = [res['result'] for res in conversion_results]
+                        scene_df['상태'] = [res['status'] for res in conversion_results]
+                        scene_df['결과 메시지'] = [res['message'] for res in conversion_results]
+                        scene_df['변환 스크립트'] = [res['result'] for res in conversion_results]
                         st.session_state.result_df = scene_df
 
     # --- 4단계: 결과 확인 ---
@@ -195,25 +209,28 @@ with main_tab:
                         st.rerun()
 
         st.write("#### ✨ 성공 및 경고 스크립트 모음")
-        successful_scripts = st.session_state.result_df[st.session_state.result_df['상태'].isin(['success', 'warning'])]['변환 스크립트'].tolist()
-        if successful_scripts:
-            final_script_text = "\n\n".join(successful_scripts)
+        if st.session_state.result_df is not None:
+            successful_scripts = st.session_state.result_df[
+                st.session_state.result_df['상태'].isin(['success', 'warning'])
+            ]['변환 스크립트'].tolist()
             
-            # 복사 가능한 텍스트 영역
-            st.text_area(
-                "📋 변환된 스크립트 (전체 선택: Ctrl+A, 복사: Ctrl+C)", 
-                value=final_script_text, 
-                height=300, 
-                key="final_script_display",
-                help="이 영역의 텍스트를 모두 선택(Ctrl+A)한 후 복사(Ctrl+C)하세요."
-            )
-            
-            # 스크립트 통계 정보
-            script_lines = final_script_text.count('\n') + 1
-            script_blocks = len(successful_scripts)
-            st.info(f"📊 총 {script_blocks}개 변환 결과, {script_lines}줄의 스크립트가 생성되었습니다.")
-        else:
-            st.warning("복사할 수 있는 성공적인 스크립트가 없습니다.")
+            if successful_scripts:
+                final_script_text = "\n\n".join(successful_scripts)                
+                # 복사 가능한 텍스트 영역
+                st.text_area(
+                    "📋 변환된 스크립트 (전체 선택: Ctrl+A, 복사: Ctrl+C)", 
+                    value=final_script_text, 
+                    height=300, 
+                    key=f"final_script_display_{selected_scene}_{len(successful_scripts)}",  # 동적 key
+                    help="이 영역의 텍스트를 모두 선택(Ctrl+A)한 후 복사(Ctrl+C)하세요."
+                )
+                
+                # 스크립트 통계 정보
+                script_lines = final_script_text.count('\n') + 1
+                script_blocks = len(successful_scripts)
+                st.info(f"📊 총 {script_blocks}개 변환 결과, {script_lines}줄의 스크립트가 생성되었습니다.")
+            else:
+                st.warning("복사할 수 있는 성공적인 스크립트가 없습니다.")
 
 # =======================
 # ===== 캐릭터 관리 탭 =====
