@@ -36,6 +36,18 @@ def init_data_managers(_sheets_manager, _settings_url):
             return None, None, None, None
     return None, None, None, None
 
+def add_debug_log(message, data=None):
+    """디버그 로그를 세션에 추가"""
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    log_entry = {
+        "time": timestamp,
+        "message": message,
+        "data": data
+    }
+    if 'debug_log' not in st.session_state:
+        st.session_state.debug_log = []
+    st.session_state.debug_log.append(log_entry)
 
 # --- 세션 상태 관리 ---
 if 'settings_url' not in st.session_state: 
@@ -52,6 +64,11 @@ st.title("🎬 대사 변환기 v3.7 (Final)")
 
 # --- 사이드바 ---
 st.sidebar.header("⚙️ 공통 설정")
+# 디버그 모드 토글 추가
+debug_mode = st.sidebar.checkbox("🐛 디버그 모드", help="상세 로그를 표시합니다")
+if 'debug_log' not in st.session_state:
+    st.session_state.debug_log = []
+
 sheets_manager = get_sheets_manager() # 1. API 클라이언트 먼저 생성
 
 settings_url_input = st.sidebar.text_input(
@@ -140,15 +157,38 @@ with main_tab:
                     st.dataframe(scene_df)
                 
                 if st.button("🚀 변환 실행", type="primary", use_container_width=True):
-                    # 변환 전 명시적으로 이전 결과 초기화 (여기에 추가)
-                    st.session_state.result_df = None
+                    # 디버그 로그
+                    add_debug_log(f"변환 시작 - 씬 {selected_scene}", {
+                        "씬번호": selected_scene,
+                        "데이터행수": len(scene_df),
+                        "기존결과유무": st.session_state.result_df is not None
+                    })
                     
                     with st.spinner(f"씬 {selected_scene} 변환 중..."):
                         conversion_results = converter.convert_scene_data(scene_df)
+                        
+                        # 변환 결과 로깅
+                        add_debug_log("변환 완료", {
+                            "결과개수": len(conversion_results),
+                            "첫번째결과": conversion_results[0] if conversion_results else None
+                        })
+                        
                         scene_df['상태'] = [res['status'] for res in conversion_results]
                         scene_df['결과 메시지'] = [res['message'] for res in conversion_results]
                         scene_df['변환 스크립트'] = [res['result'] for res in conversion_results]
+                        
+                        # 세션 저장 전 로깅
+                        add_debug_log("세션 저장 전", {
+                            "변환스크립트샘플": scene_df['변환 스크립트'].iloc[0] if len(scene_df) > 0 else None
+                        })
+                        
                         st.session_state.result_df = scene_df
+                        
+                        # 세션 저장 후 확인
+                        add_debug_log("세션 저장 후", {
+                            "저장된행수": len(st.session_state.result_df),
+                            "저장된스크립트샘플": st.session_state.result_df['변환 스크립트'].iloc[0] if len(st.session_state.result_df) > 0 else None
+                        })
 
     # --- 4단계: 결과 확인 ---
     if st.session_state.result_df is not None:
@@ -213,7 +253,13 @@ with main_tab:
             successful_scripts = st.session_state.result_df[
                 st.session_state.result_df['상태'].isin(['success', 'warning'])
             ]['변환 스크립트'].tolist()
-            
+
+            # 디버그 로그
+            add_debug_log("스크립트 표시", {
+                "성공스크립트수": len(successful_scripts),
+                "첫스크립트": successful_scripts[0][:50] if successful_scripts else None
+            })
+
             if successful_scripts:
                 final_script_text = "\n\n".join(successful_scripts)                
                 # 복사 가능한 텍스트 영역
@@ -231,6 +277,19 @@ with main_tab:
                 st.info(f"📊 총 {script_blocks}개 변환 결과, {script_lines}줄의 스크립트가 생성되었습니다.")
             else:
                 st.warning("복사할 수 있는 성공적인 스크립트가 없습니다.")
+
+        # 디버그 모드일 때 로그 표시
+        if debug_mode and st.session_state.debug_log:
+            with st.expander("🐛 디버그 로그", expanded=False):
+                for log in st.session_state.debug_log[-20:]:  # 최근 20개만 표시
+                    st.text(f"[{log['time']}] {log['message']}")
+                    if log['data']:
+                        st.json(log['data'])
+                
+                if st.button("로그 초기화"):
+                    st.session_state.debug_log = []
+                    st.rerun()
+
 
 # =======================
 # ===== 캐릭터 관리 탭 =====
