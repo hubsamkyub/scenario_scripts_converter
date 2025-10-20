@@ -59,6 +59,7 @@ if 'sheet_data' not in st.session_state: st.session_state.sheet_data = None
 if 'scene_numbers' not in st.session_state: st.session_state.scene_numbers = []
 if 'result_df' not in st.session_state: st.session_state.result_df = None
 if 'editing_char_id' not in st.session_state: st.session_state.editing_char_id = None
+if 'debug_log' not in st.session_state: st.session_state.debug_log = []  # 여기 추가
 
 st.title("🎬 대사 변환기 v3.7 (Final)")
 
@@ -66,6 +67,7 @@ st.title("🎬 대사 변환기 v3.7 (Final)")
 st.sidebar.header("⚙️ 공통 설정")
 # 디버그 모드 토글 추가
 debug_mode = st.sidebar.checkbox("🐛 디버그 모드", help="상세 로그를 표시합니다")
+
 if 'debug_log' not in st.session_state:
     st.session_state.debug_log = []
 
